@@ -11,9 +11,9 @@ public class SellOneItemTest {
     public void productFound() throws Exception {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
-        final Sale sale = new Sale(display, HashMap.of(
-                "12345", "€ 5.50",
-                "23456", "€ 7.95"), messageFormat);
+        final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
+                    "12345", "€ 5.50",
+                    "23456", "€ 7.95")));
 
         sale.onBarcode("12345");
 
@@ -24,9 +24,9 @@ public class SellOneItemTest {
     public void anotherProductFound() throws Exception {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
-        final Sale sale = new Sale(display, HashMap.of(
-                "12345", "€ 5.50",
-                "23456", "€ 7.95"), messageFormat);
+        final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
+                    "12345", "€ 5.50",
+                    "23456", "€ 7.95")));
 
         sale.onBarcode("23456");
 
@@ -37,9 +37,9 @@ public class SellOneItemTest {
     public void productNotFound() throws Exception {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
-        final Sale sale = new Sale(display, HashMap.of(
-                "12345", "€ 5.50",
-                "23456", "€ 7.95"), messageFormat);
+        final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
+                    "12345", "€ 5.50",
+                    "23456", "€ 7.95")));
 
         sale.onBarcode("99999");
 
@@ -50,7 +50,7 @@ public class SellOneItemTest {
     public void emptyBarcode() throws Exception {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
-        final Sale sale = new Sale(display, null, messageFormat);
+        final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(null));
 
         sale.onBarcode("");
 
@@ -58,44 +58,8 @@ public class SellOneItemTest {
 
     }
 
-    public static class Sale {
-        private final Map<String, String> pricesByBarcode;
-        private final MessageFormat messageFormat;
-        private final Catalog catalog;
-        private Display display;
-
-        public Sale(final Display display, final Map<String, String> pricesByBarcode, final MessageFormat messageFormat) {
-            this.display = display;
-            this.pricesByBarcode = pricesByBarcode;
-            this.catalog = new InMemoryCatalog(pricesByBarcode);
-            this.messageFormat = messageFormat;
-        }
-
-        public void onBarcode(final String barcode) {
-            if ("".equals(barcode)) {
-                final String message = messageFormat.formatEmptyBarcodeMessage();
-                display.setText(message);
-            } else {
-                final Option<String> maybePrice = findPrice(barcode);
-                final Option<String> maybeProductFoundMessage = maybePrice.map(messageFormat::formatProductFoundMessage);
-                final String message = maybeProductFoundMessage.getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
-                display.setText(message);
-            }
-        }
-
-        private Option<String> findPrice(final String barcode) {
-            return pricesByBarcode.get(barcode);
-        }
-    }
-
-    public interface Catalog {}
-
-    public static class InMemoryCatalog implements Catalog {
-        private final Map<String, String> pricesByBarcode;
-
-        public InMemoryCatalog(final Map<String, String> pricesByBarcode) {
-            this.pricesByBarcode = pricesByBarcode;
-        }
+    public interface Catalog {
+        Option<String> findPrice(String barcode);
     }
 
     public interface MessageFormat {
@@ -104,6 +68,43 @@ public class SellOneItemTest {
         String formatProductNotFoundMessage(String barcode);
 
         String formatEmptyBarcodeMessage();
+    }
+
+    public static class Sale {
+        private final MessageFormat messageFormat;
+        private final Catalog catalog;
+        private Display display;
+
+        public Sale(final Display display, final MessageFormat messageFormat, final Catalog catalog) {
+            this.display = display;
+            this.catalog = catalog;
+            this.messageFormat = messageFormat;
+        }
+
+        public void onBarcode(final String barcode) {
+            if ("".equals(barcode)) {
+                final String message = messageFormat.formatEmptyBarcodeMessage();
+                display.setText(message);
+            } else {
+                final Option<String> maybePrice = catalog.findPrice(barcode);
+                final Option<String> maybeProductFoundMessage = maybePrice.map(messageFormat::formatProductFoundMessage);
+                final String message = maybeProductFoundMessage.getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
+                display.setText(message);
+            }
+        }
+    }
+
+    public static class InMemoryCatalog implements Catalog {
+        private final Map<String, String> pricesByBarcode;
+
+        public InMemoryCatalog(final Map<String, String> pricesByBarcode) {
+            this.pricesByBarcode = pricesByBarcode;
+        }
+
+        @Override
+        public Option<String> findPrice(String barcode) {
+            return pricesByBarcode.get(barcode);
+        }
     }
 
     public static class EnglishLanguageMessageFormat implements MessageFormat {
