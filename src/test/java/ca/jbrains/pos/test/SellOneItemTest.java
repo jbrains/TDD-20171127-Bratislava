@@ -12,8 +12,8 @@ public class SellOneItemTest {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
-                    "12345", "€ 5.50",
-                    "23456", "€ 7.95")));
+                "12345", "€ 5.50",
+                "23456", "€ 7.95")));
 
         sale.onBarcode("12345");
 
@@ -25,8 +25,8 @@ public class SellOneItemTest {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
-                    "12345", "€ 5.50",
-                    "23456", "€ 7.95")));
+                "12345", "€ 5.50",
+                "23456", "€ 7.95")));
 
         sale.onBarcode("23456");
 
@@ -38,8 +38,8 @@ public class SellOneItemTest {
         final Display display = new Display();
         final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, messageFormat, new InMemoryCatalog(HashMap.of(
-                    "12345", "€ 5.50",
-                    "23456", "€ 7.95")));
+                "12345", "€ 5.50",
+                "23456", "€ 7.95")));
 
         sale.onBarcode("99999");
 
@@ -82,15 +82,16 @@ public class SellOneItemTest {
         }
 
         public void onBarcode(final String barcode) {
+            String message;
             if ("".equals(barcode)) {
-                final String message = messageFormat.formatEmptyBarcodeMessage();
-                display.setText(message);
+                message = messageFormat.formatEmptyBarcodeMessage();
             } else {
-                final Option<String> maybePrice = catalog.findPrice(barcode);
-                final Option<String> maybeProductFoundMessage = maybePrice.map(messageFormat::formatProductFoundMessage);
-                final String message = maybeProductFoundMessage.getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
-                display.setText(message);
+                message = catalog.findPrice(barcode)
+                        .map(messageFormat::formatProductFoundMessage)
+                        .getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
             }
+
+            display.setText(message);
         }
     }
 
