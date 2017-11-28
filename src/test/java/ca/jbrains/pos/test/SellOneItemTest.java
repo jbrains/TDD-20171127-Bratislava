@@ -6,22 +6,48 @@ import org.junit.Test;
 public class SellOneItemTest {
     @Test
     public void productFound() throws Exception {
-        final Sale sale = new Sale();
         final Display display = new Display();
+        final Sale sale = new Sale(display);
 
         sale.onBarcode("12345");
 
         Assert.assertEquals("€ 5.50", display.getText());
     }
 
-    public static class Sale {
-        public void onBarcode(final String barcode) {
+    @Test
+    public void anotherProductFound() throws Exception {
+        final Display display = new Display();
+        final Sale sale = new Sale(display);
 
+        sale.onBarcode("23456");
+
+        Assert.assertEquals("€ 7.95", display.getText());
+    }
+
+    public static class Sale {
+        private Display display;
+
+        public Sale(final Display display) {
+            this.display = display;
+        }
+
+        public void onBarcode(final String barcode) {
+            if ("12345".equals(barcode))
+                display.setText("€ 5.50");
+            else
+                display.setText("€ 7.95");
         }
     }
+
     public static class Display {
+        private String text;
+
         public String getText() {
-            return "€ 5.50";
+            return text;
+        }
+
+        public void setText(final String text) {
+            this.text = text;
         }
     }
 }
