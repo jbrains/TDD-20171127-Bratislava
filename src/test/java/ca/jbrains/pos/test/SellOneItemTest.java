@@ -71,9 +71,9 @@ public class SellOneItemTest {
     }
 
     public static class Sale {
+        private final Display display;
         private final MessageFormat messageFormat;
         private final Catalog catalog;
-        private Display display;
 
         public Sale(final Display display, final MessageFormat messageFormat, final Catalog catalog) {
             this.display = display;
