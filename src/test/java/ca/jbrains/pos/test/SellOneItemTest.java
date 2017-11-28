@@ -10,9 +10,10 @@ public class SellOneItemTest {
     @Test
     public void productFound() throws Exception {
         final Display display = new Display();
+        final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, HashMap.of(
                 "12345", "€ 5.50",
-                "23456", "€ 7.95"));
+                "23456", "€ 7.95"), messageFormat);
 
         sale.onBarcode("12345");
 
@@ -22,9 +23,10 @@ public class SellOneItemTest {
     @Test
     public void anotherProductFound() throws Exception {
         final Display display = new Display();
+        final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, HashMap.of(
                 "12345", "€ 5.50",
-                "23456", "€ 7.95"));
+                "23456", "€ 7.95"), messageFormat);
 
         sale.onBarcode("23456");
 
@@ -34,9 +36,10 @@ public class SellOneItemTest {
     @Test
     public void productNotFound() throws Exception {
         final Display display = new Display();
+        final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
         final Sale sale = new Sale(display, HashMap.of(
                 "12345", "€ 5.50",
-                "23456", "€ 7.95"));
+                "23456", "€ 7.95"), messageFormat);
 
         sale.onBarcode("99999");
 
@@ -46,7 +49,8 @@ public class SellOneItemTest {
     @Test
     public void emptyBarcode() throws Exception {
         final Display display = new Display();
-        final Sale sale = new Sale(display, null);
+        final MessageFormat messageFormat = new EnglishLanguageMessageFormat();
+        final Sale sale = new Sale(display, null, messageFormat);
 
         sale.onBarcode("");
 
@@ -59,10 +63,10 @@ public class SellOneItemTest {
         private final MessageFormat messageFormat;
         private Display display;
 
-        public Sale(final Display display, final Map<String, String> pricesByBarcode) {
+        public Sale(final Display display, final Map<String, String> pricesByBarcode, final MessageFormat messageFormat) {
             this.display = display;
             this.pricesByBarcode = pricesByBarcode;
-            this.messageFormat = new EnglishLanguageMessageFormat();
+            this.messageFormat = messageFormat;
         }
 
         public void onBarcode(final String barcode) {
