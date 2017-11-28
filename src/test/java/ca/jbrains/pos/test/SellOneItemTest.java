@@ -10,7 +10,9 @@ public class SellOneItemTest {
     @Test
     public void productFound() throws Exception {
         final Display display = new Display();
-        final Sale sale = new Sale(display);
+        final Sale sale = new Sale(display, HashMap.of(
+                "12345", "€ 5.50",
+                "23456", "€ 7.95"));
 
         sale.onBarcode("12345");
 
@@ -20,7 +22,9 @@ public class SellOneItemTest {
     @Test
     public void anotherProductFound() throws Exception {
         final Display display = new Display();
-        final Sale sale = new Sale(display);
+        final Sale sale = new Sale(display, HashMap.of(
+                "12345", "€ 5.50",
+                "23456", "€ 7.95"));
 
         sale.onBarcode("23456");
 
@@ -30,7 +34,9 @@ public class SellOneItemTest {
     @Test
     public void productNotFound() throws Exception {
         final Display display = new Display();
-        final Sale sale = new Sale(display);
+        final Sale sale = new Sale(display, HashMap.of(
+                "12345", "€ 5.50",
+                "23456", "€ 7.95"));
 
         sale.onBarcode("99999");
 
@@ -40,7 +46,7 @@ public class SellOneItemTest {
     @Test
     public void emptyBarcode() throws Exception {
         final Display display = new Display();
-        final Sale sale = new Sale(display);
+        final Sale sale = new Sale(display, null);
 
         sale.onBarcode("");
 
@@ -50,16 +56,14 @@ public class SellOneItemTest {
 
     public static class Sale {
         private Display display;
+        private final Map<String, String> pricesByBarcode;
 
-        public Sale(final Display display) {
+        public Sale(final Display display, final Map<String, String> pricesByBarcode) {
             this.display = display;
+            this.pricesByBarcode = pricesByBarcode;
         }
 
         public void onBarcode(final String barcode) {
-            final Map<String, String> pricesByBarcode = HashMap.of(
-                    "12345", "€ 5.50",
-                    "23456", "€ 7.95");
-
             if ("".equals(barcode)) {
                 display.setText("Scanning error: empty barcode");
             }
