@@ -56,21 +56,23 @@ public class SellOneItemTest {
 
     public static class Sale {
         private final Map<String, String> pricesByBarcode;
+        private final MessageFormat messageFormat;
         private Display display;
 
         public Sale(final Display display, final Map<String, String> pricesByBarcode) {
             this.display = display;
             this.pricesByBarcode = pricesByBarcode;
+            this.messageFormat = new EnglishLanguageMessageFormat();
         }
 
         public void onBarcode(final String barcode) {
             if ("".equals(barcode)) {
-                final String message = formatEmptyBarcodeMessage();
+                final String message = messageFormat.formatEmptyBarcodeMessage();
                 display.setText(message);
             } else {
                 final Option<String> maybePrice = findPrice(barcode);
-                final Option<String> maybeProductFoundMessage = maybePrice.map(this::formatProductFoundMessage);
-                final String message = maybeProductFoundMessage.getOrElse(formatProductNotFoundMessage(barcode));
+                final Option<String> maybeProductFoundMessage = maybePrice.map(price -> messageFormat.formatProductFoundMessage(price));
+                final String message = maybeProductFoundMessage.getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
                 display.setText(message);
             }
         }
@@ -78,16 +80,29 @@ public class SellOneItemTest {
         private Option<String> findPrice(final String barcode) {
             return pricesByBarcode.get(barcode);
         }
+    }
 
-        private String formatProductFoundMessage(final String price) {
+    public interface MessageFormat {
+        String formatProductFoundMessage(String price);
+
+        String formatProductNotFoundMessage(String barcode);
+
+        String formatEmptyBarcodeMessage();
+    }
+
+    public static class EnglishLanguageMessageFormat implements MessageFormat {
+        @Override
+        public String formatProductFoundMessage(final String price) {
             return price;
         }
 
-        private String formatProductNotFoundMessage(final String barcode) {
+        @Override
+        public String formatProductNotFoundMessage(final String barcode) {
             return String.format("Product not found for %s", barcode);
         }
 
-        private String formatEmptyBarcodeMessage() {
+        @Override
+        public String formatEmptyBarcodeMessage() {
             return "Scanning error: empty barcode";
         }
     }
