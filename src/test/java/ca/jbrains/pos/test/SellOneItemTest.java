@@ -1,5 +1,8 @@
 package ca.jbrains.pos.test;
 
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
+import io.vavr.control.Option;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -53,14 +56,19 @@ public class SellOneItemTest {
         }
 
         public void onBarcode(final String barcode) {
-            if ("".equals(barcode))
+            final Map<String, String> pricesByBarcode = HashMap.of(
+                    "12345", "€ 5.50",
+                    "23456", "€ 7.95");
+
+            if ("".equals(barcode)) {
                 display.setText("Scanning error: empty barcode");
-            else if ("12345".equals(barcode))
-                display.setText("€ 5.50");
-            else if ("23456".equals(barcode))
-                display.setText("€ 7.95");
-            else
-                display.setText(String.format("Product not found for %s", barcode));
+            }
+            else {
+                final Option<String> maybePrice = pricesByBarcode.get(barcode);
+                final String message = maybePrice.getOrElse(
+                                String.format("Product not found for %s", barcode));
+                display.setText(message);
+            }
         }
     }
 
