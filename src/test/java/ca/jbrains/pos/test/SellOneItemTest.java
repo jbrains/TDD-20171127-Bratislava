@@ -55,8 +55,8 @@ public class SellOneItemTest {
     }
 
     public static class Sale {
-        private Display display;
         private final Map<String, String> pricesByBarcode;
+        private Display display;
 
         public Sale(final Display display, final Map<String, String> pricesByBarcode) {
             this.display = display;
@@ -65,14 +65,30 @@ public class SellOneItemTest {
 
         public void onBarcode(final String barcode) {
             if ("".equals(barcode)) {
-                display.setText("Scanning error: empty barcode");
-            }
-            else {
-                final Option<String> maybePrice = pricesByBarcode.get(barcode);
-                final String message = maybePrice.getOrElse(
-                                String.format("Product not found for %s", barcode));
+                final String message = formatEmptyBarcodeMessage();
+                display.setText(message);
+            } else {
+                final Option<String> maybePrice = findPrice(barcode);
+                final Option<String> maybeProductFoundMessage = maybePrice.map(this::formatProductFoundMessage);
+                final String message = maybeProductFoundMessage.getOrElse(formatProductNotFoundMessage(barcode));
                 display.setText(message);
             }
+        }
+
+        private Option<String> findPrice(final String barcode) {
+            return pricesByBarcode.get(barcode);
+        }
+
+        private String formatProductFoundMessage(final String price) {
+            return price;
+        }
+
+        private String formatProductNotFoundMessage(final String barcode) {
+            return String.format("Product not found for %s", barcode);
+        }
+
+        private String formatEmptyBarcodeMessage() {
+            return "Scanning error: empty barcode";
         }
     }
 
