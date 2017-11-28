@@ -61,11 +61,13 @@ public class SellOneItemTest {
     public static class Sale {
         private final Map<String, String> pricesByBarcode;
         private final MessageFormat messageFormat;
+        private final Catalog catalog;
         private Display display;
 
         public Sale(final Display display, final Map<String, String> pricesByBarcode, final MessageFormat messageFormat) {
             this.display = display;
             this.pricesByBarcode = pricesByBarcode;
+            this.catalog = new InMemoryCatalog(pricesByBarcode);
             this.messageFormat = messageFormat;
         }
 
@@ -83,6 +85,16 @@ public class SellOneItemTest {
 
         private Option<String> findPrice(final String barcode) {
             return pricesByBarcode.get(barcode);
+        }
+    }
+
+    public interface Catalog {}
+
+    public static class InMemoryCatalog implements Catalog {
+        private final Map<String, String> pricesByBarcode;
+
+        public InMemoryCatalog(final Map<String, String> pricesByBarcode) {
+            this.pricesByBarcode = pricesByBarcode;
         }
     }
 
