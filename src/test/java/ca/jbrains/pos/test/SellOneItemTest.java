@@ -75,7 +75,7 @@ public class SellOneItemTest {
                 display.setText(message);
             } else {
                 final Option<String> maybePrice = findPrice(barcode);
-                final Option<String> maybeProductFoundMessage = maybePrice.map(price -> messageFormat.formatProductFoundMessage(price));
+                final Option<String> maybeProductFoundMessage = maybePrice.map(messageFormat::formatProductFoundMessage);
                 final String message = maybeProductFoundMessage.getOrElse(messageFormat.formatProductNotFoundMessage(barcode));
                 display.setText(message);
             }
